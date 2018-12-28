@@ -2,12 +2,14 @@ package org.openapitools.server.api.verticle;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.Future;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
+import org.openapitools.server.api.ApiRegistry;
 import java.io.File;
 import org.openapitools.server.api.MainApiException;
 import org.openapitools.server.api.model.ModelApiResponse;
@@ -17,8 +19,8 @@ import java.util.List;
 import java.util.Map;
 
 public class PetApiVerticle extends AbstractVerticle {
-    final static Logger LOGGER = LoggerFactory.getLogger(PetApiVerticle.class); 
-    
+    final static Logger LOGGER = LoggerFactory.getLogger(PetApiVerticle.class);
+
     final static String ADDPET_SERVICE_ID = "addPet";
     final static String DELETEPET_SERVICE_ID = "deletePet";
     final static String FINDPETSBYSTATUS_SERVICE_ID = "findPetsByStatus";
@@ -31,30 +33,24 @@ public class PetApiVerticle extends AbstractVerticle {
     final PetApi service;
 
     public PetApiVerticle() {
-        try {
-            Class serviceImplClass = getClass().getClassLoader().loadClass("org.openapitools.server.api.verticle.PetApiImpl");
-            service = (PetApi)serviceImplClass.newInstance();
-        } catch (Exception e) {
-            logUnexpectedError("PetApiVerticle constructor", e);
-            throw new RuntimeException(e);
-        }
+        service = (org.openapitools.server.api.verticle.PetApi) ApiRegistry.getInstance().get("org.openapitools.server.api.verticle.PetApiImpl");
     }
 
     @Override
-    public void start() throws Exception {
+    public void start(Future<Void> startFuture) throws Exception {
         
         //Consumer for addPet
         vertx.eventBus().<JsonObject> consumer(ADDPET_SERVICE_ID).handler(message -> {
             try {
                 // Workaround for #allParams section clearing the vendorExtensions map
                 String serviceId = "addPet";
-                JsonObject petParam = message.body().getJsonObject("Pet");
-                if (petParam == null) {
-                    manageError(message, new MainApiException(400, "Pet is required"), serviceId);
+                JsonObject bodyParam = message.body().getJsonObject("body");
+                if (bodyParam == null) {
+                    manageError(message, new MainApiException(400, "body is required"), serviceId);
                     return;
                 }
-                Pet pet = Json.mapper.readValue(petParam.encode(), Pet.class);
-                service.addPet(pet).subscribe(
+                Pet body = Json.mapper.readValue(bodyParam.encode(), Pet.class);
+                service.addPet(body).subscribe(
                     () -> {
                         message.reply(null);
                     },
@@ -73,13 +69,9 @@ public class PetApiVerticle extends AbstractVerticle {
                 // Workaround for #allParams section clearing the vendorExtensions map
                 String serviceId = "deletePet";
                 String petIdParam = message.body().getString("petId");
-                if(petIdParam == null) {
-                    manageError(message, new MainApiException(400, "petId is required"), serviceId);
-                    return;
-                }
                 Long petId = Json.mapper.readValue(petIdParam, Long.class);
                 String apiKeyParam = message.body().getString("api_key");
-                String apiKey = (apiKeyParam == null) ? null : apiKeyParam;
+                String apiKey = apiKeyParam;
                 service.deletePet(petId, apiKey).subscribe(
                     () -> {
                         message.reply(null);
@@ -99,12 +91,7 @@ public class PetApiVerticle extends AbstractVerticle {
                 // Workaround for #allParams section clearing the vendorExtensions map
                 String serviceId = "findPetsByStatus";
                 JsonArray statusParam = message.body().getJsonArray("status");
-                if(statusParam == null) {
-                    manageError(message, new MainApiException(400, "status is required"), serviceId);
-                    return;
-                }
-                List<String> status = Json.mapper.readValue(statusParam.encode(),
-                    Json.mapper.getTypeFactory().constructCollectionType(List.class, String.class));
+                List<String> status = Json.mapper.readValue(statusParam.encode(), Json.mapper.getTypeFactory().constructCollectionType(List.class, String.class));
                 service.findPetsByStatus(status).subscribe(
                     result -> {
                         message.reply(new JsonArray(Json.encode(result)).encodePrettily());
@@ -124,12 +111,7 @@ public class PetApiVerticle extends AbstractVerticle {
                 // Workaround for #allParams section clearing the vendorExtensions map
                 String serviceId = "findPetsByTags";
                 JsonArray tagsParam = message.body().getJsonArray("tags");
-                if(tagsParam == null) {
-                    manageError(message, new MainApiException(400, "tags is required"), serviceId);
-                    return;
-                }
-                List<String> tags = Json.mapper.readValue(tagsParam.encode(),
-                    Json.mapper.getTypeFactory().constructCollectionType(List.class, String.class));
+                List<String> tags = Json.mapper.readValue(tagsParam.encode(), Json.mapper.getTypeFactory().constructCollectionType(List.class, String.class));
                 service.findPetsByTags(tags).subscribe(
                     result -> {
                         message.reply(new JsonArray(Json.encode(result)).encodePrettily());
@@ -149,10 +131,6 @@ public class PetApiVerticle extends AbstractVerticle {
                 // Workaround for #allParams section clearing the vendorExtensions map
                 String serviceId = "getPetById";
                 String petIdParam = message.body().getString("petId");
-                if(petIdParam == null) {
-                    manageError(message, new MainApiException(400, "petId is required"), serviceId);
-                    return;
-                }
                 Long petId = Json.mapper.readValue(petIdParam, Long.class);
                 service.getPetById(petId).subscribe(
                     result -> {
@@ -172,13 +150,13 @@ public class PetApiVerticle extends AbstractVerticle {
             try {
                 // Workaround for #allParams section clearing the vendorExtensions map
                 String serviceId = "updatePet";
-                JsonObject petParam = message.body().getJsonObject("Pet");
-                if (petParam == null) {
-                    manageError(message, new MainApiException(400, "Pet is required"), serviceId);
+                JsonObject bodyParam = message.body().getJsonObject("body");
+                if (bodyParam == null) {
+                    manageError(message, new MainApiException(400, "body is required"), serviceId);
                     return;
                 }
-                Pet pet = Json.mapper.readValue(petParam.encode(), Pet.class);
-                service.updatePet(pet).subscribe(
+                Pet body = Json.mapper.readValue(bodyParam.encode(), Pet.class);
+                service.updatePet(body).subscribe(
                     () -> {
                         message.reply(null);
                     },
@@ -197,15 +175,11 @@ public class PetApiVerticle extends AbstractVerticle {
                 // Workaround for #allParams section clearing the vendorExtensions map
                 String serviceId = "updatePetWithForm";
                 String petIdParam = message.body().getString("petId");
-                if(petIdParam == null) {
-                    manageError(message, new MainApiException(400, "petId is required"), serviceId);
-                    return;
-                }
                 Long petId = Json.mapper.readValue(petIdParam, Long.class);
                 String nameParam = message.body().getString("name");
-                String name = (nameParam == null) ? null : nameParam;
+                String name = nameParam;
                 String statusParam = message.body().getString("status");
-                String status = (statusParam == null) ? null : statusParam;
+                String status = statusParam;
                 service.updatePetWithForm(petId, name, status).subscribe(
                     () -> {
                         message.reply(null);
@@ -225,15 +199,11 @@ public class PetApiVerticle extends AbstractVerticle {
                 // Workaround for #allParams section clearing the vendorExtensions map
                 String serviceId = "uploadFile";
                 String petIdParam = message.body().getString("petId");
-                if(petIdParam == null) {
-                    manageError(message, new MainApiException(400, "petId is required"), serviceId);
-                    return;
-                }
                 Long petId = Json.mapper.readValue(petIdParam, Long.class);
                 String additionalMetadataParam = message.body().getString("additionalMetadata");
-                String additionalMetadata = (additionalMetadataParam == null) ? null : additionalMetadataParam;
+                String additionalMetadata = additionalMetadataParam;
                 String fileParam = message.body().getString("file");
-                File file = (fileParam == null) ? null : Json.mapper.readValue(fileParam, File.class);
+                File file = Json.mapper.readValue(fileParam, File.class);
                 service.uploadFile(petId, additionalMetadata, file).subscribe(
                     result -> {
                         message.reply(new JsonObject(Json.encode(result)).encodePrettily());
@@ -248,7 +218,7 @@ public class PetApiVerticle extends AbstractVerticle {
         });
         
     }
-    
+
     private void manageError(Message<JsonObject> message, Throwable cause, String serviceName) {
         int code = MainApiException.INTERNAL_SERVER_ERROR.getStatusCode();
         String statusMessage = MainApiException.INTERNAL_SERVER_ERROR.getStatusMessage();
@@ -256,12 +226,12 @@ public class PetApiVerticle extends AbstractVerticle {
             code = ((MainApiException)cause).getStatusCode();
             statusMessage = ((MainApiException)cause).getStatusMessage();
         } else {
-            logUnexpectedError(serviceName, cause); 
+            logUnexpectedError(serviceName, cause);
         }
-            
+
         message.fail(code, statusMessage);
     }
-    
+
     private void logUnexpectedError(String serviceName, Throwable cause) {
         LOGGER.error("Unexpected error in "+ serviceName, cause);
     }

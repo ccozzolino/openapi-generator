@@ -6,32 +6,34 @@ import org.openapitools.server.api.model.User;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 
+import org.openapitools.server.api.Api;
+
 import java.util.List;
 import java.util.Map;
 
-public interface UserApi  {
+public interface UserApi extends Api {
     //createUser
-    void createUser(User user, Handler<AsyncResult<Void>> handler);
-    
+    void createUser(User body, Handler<AsyncResult<Void>> handler);
+
     //createUsersWithArrayInput
-    void createUsersWithArrayInput(List<User> user, Handler<AsyncResult<Void>> handler);
-    
+    void createUsersWithArrayInput(List<User> body, Handler<AsyncResult<Void>> handler);
+
     //createUsersWithListInput
-    void createUsersWithListInput(List<User> user, Handler<AsyncResult<Void>> handler);
-    
+    void createUsersWithListInput(List<User> body, Handler<AsyncResult<Void>> handler);
+
     //deleteUser
     void deleteUser(String username, Handler<AsyncResult<Void>> handler);
-    
+
     //getUserByName
     void getUserByName(String username, Handler<AsyncResult<User>> handler);
-    
+
     //loginUser
     void loginUser(String username, String password, Handler<AsyncResult<String>> handler);
-    
+
     //logoutUser
     void logoutUser(Handler<AsyncResult<Void>> handler);
-    
+
     //updateUser
-    void updateUser(String username, User user, Handler<AsyncResult<Void>> handler);
-    
+    void updateUser(String username, User body, Handler<AsyncResult<Void>> handler);
+
 }

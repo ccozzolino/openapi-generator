@@ -1,0 +1,30 @@
+          {{#isString}}
+            jsonObject = jsonObject.put("{{paramName}}", requestParameters.queryParameter("{{paramName}}").getString());
+          {{/isString}}
+          {{#isLong}}
+            jsonObject = jsonObject.put("{{paramName}}", requestParameters.queryParameter("{{paramName}}").getLong());
+          {{/isLong}}
+          {{#isFloat}}
+            jsonObject = jsonObject.put("{{paramName}}", requestParameters.queryParameter("{{paramName}}").getFloat());
+          {{/isFloat}}
+          {{#isDouble}}
+            jsonObject = jsonObject.put("{{paramName}}", requestParameters.queryParameter("{{paramName}}").getDouble());
+          {{/isDouble}}
+          {{#isBoolean}}
+            jsonObject = jsonObject.put("{{paramName}}", requestParameters.queryParameter("{{paramName}}").getBoolean());
+          {{/isBoolean}}
+          {{#isDate}}
+            jsonObject = jsonObject.put("{{paramName}}", requestParameters.queryParameter("{{paramName}}").getString());
+          {{/isDate}}
+          {{#isContainer}}
+            {{#isContainerFormatMulti}}
+              jsonObject = jsonObject.put("{{paramName}}", requestParameters.queryParameter("{{paramName}}").getArray().stream().map(
+              {{#isString}}RequestParameter::getString{{/isString}}
+              {{#isLong}}RequestParameter::getLong{{/isLong}}
+              {{#isDouble}}RequestParameter::getDouble{{/isDouble}}
+              {{#isBoolean}}RequestParameter::getBoolean{{/isBoolean}}).collect(Collectors.toList());
+            {{/isContainerFormatMulti}}
+            {{^isContainerFormatMulti}}
+              jsonObject = jsonObject.put("{{paramName}}", requestParameters.queryParameter("{{paramName}}").getString());
+            {{/isContainerFormatMulti}}
+          {{/isContainer}}

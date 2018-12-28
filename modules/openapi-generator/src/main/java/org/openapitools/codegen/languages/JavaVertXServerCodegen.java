@@ -68,9 +68,10 @@ public class JavaVertXServerCodegen extends AbstractJavaCodegen {
         modelTemplateFiles.put("model.mustache", ".java");
 
         apiTemplateFiles.clear();
-        apiTemplateFiles.put("api.mustache", ".java");
+        apiTemplateFiles.put("apiGenerated.mustache", ".java");
         apiTemplateFiles.put("apiVerticle.mustache", "Verticle.java");
         apiTemplateFiles.put("apiException.mustache", "Exception.java");
+        apiTemplateFiles.put("apiMessageBuilderImpl.mustache", "MessageBuilderImpl.java");
 
         embeddedTemplateDir = templateDir = "JavaVertXServer";
 
@@ -89,9 +90,6 @@ public class JavaVertXServerCodegen extends AbstractJavaCodegen {
         cliOptions.add(CliOption.newBoolean(RX_INTERFACE_OPTION,
                 "When specified, API interfaces are generated with RX "
                         + "and methods return Single<> and Comparable."));
-        cliOptions.add(CliOption.newString(VERTX_SWAGGER_ROUTER_VERSION_OPTION,
-                "Specify the version of the swagger router library"));
-
     }
 
     /**
@@ -142,12 +140,45 @@ public class JavaVertXServerCodegen extends AbstractJavaCodegen {
 
         supportingFiles.clear();
         supportingFiles.add(new SupportingFile("openapi.mustache", resourceFolder, "openapi.json"));
-        supportingFiles.add(new SupportingFile("MainApiVerticle.mustache",
+        supportingFiles.add(new SupportingFile("apiInterface.mustache",
+            sourceFolder + File.separator + rootPackage.replace(".", File.separator),
+            "Api.java"));
+        supportingFiles.add(new SupportingFile("apiKeyAuthHandler.mustache",
+            sourceFolder + File.separator + rootPackage.replace(".", File.separator),
+            "ApiKeyAuthHandler.java"));
+        supportingFiles.add(new SupportingFile("authProviderRegistry.mustache",
+            sourceFolder + File.separator + rootPackage.replace(".", File.separator),
+            "AuthProviderRegistry.java"));
+        supportingFiles.add(new SupportingFile("contentExtractor.mustache",
+            sourceFolder + File.separator + rootPackage.replace(".", File.separator),
+            "ContentExtractor.java"));
+        supportingFiles.add(new SupportingFile("registry.mustache",
+            sourceFolder + File.separator + rootPackage.replace(".", File.separator),
+            "Registry.java"));
+        supportingFiles.add(new SupportingFile("mainApiVerticle.mustache",
                 sourceFolder + File.separator + rootPackage.replace(".", File.separator),
                 "MainApiVerticle.java"));
-        supportingFiles.add(new SupportingFile("MainApiException.mustache",
+        supportingFiles.add(new SupportingFile("mainApiException.mustache",
                 sourceFolder + File.separator + rootPackage.replace(".", File.separator),
                 "MainApiException.java"));
+        supportingFiles.add(new SupportingFile("routeHandler.mustache",
+            sourceFolder + File.separator + rootPackage.replace(".", File.separator),
+            "RouteHandler.java"));
+        supportingFiles.add(new SupportingFile("apiRegistry.mustache",
+            sourceFolder + File.separator + rootPackage.replace(".", File.separator),
+            "ApiRegistry.java"));
+        supportingFiles.add(new SupportingFile("apiMessage.mustache",
+            sourceFolder + File.separator + rootPackage.replace(".", File.separator),
+            "ApiMessage.java"));
+        supportingFiles.add(new SupportingFile("apiMessageBuilder.mustache",
+            sourceFolder + File.separator + rootPackage.replace(".", File.separator),
+            "ApiMessageBuilder.java"));
+        supportingFiles.add(new SupportingFile("apiMessageBuilderBase.mustache",
+            sourceFolder + File.separator + rootPackage.replace(".", File.separator),
+            "ApiMessageBuilderBase.java"));
+        supportingFiles.add(new SupportingFile("apiMessageBuilderRegistry.mustache",
+            sourceFolder + File.separator + rootPackage.replace(".", File.separator),
+            "ApiMessageBuilderRegistry.java"));
 
         writeOptional(outputFolder, new SupportingFile("vertx-default-jul-logging.mustache",
                 resourceFolder, "vertx-default-jul-logging.properties"));

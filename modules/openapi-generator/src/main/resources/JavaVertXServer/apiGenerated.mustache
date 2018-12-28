@@ -12,20 +12,22 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 {{/rxInterface}}
 
+import {{rootPackage}}.Api;
+
 import java.util.List;
 import java.util.Map;
 
-public interface {{classname}}  {
+public interface {{classname}} extends Api {
 {{#operations}}
 {{#operation}}
     //{{#vendorExtensions}}{{x-serviceid}}{{/vendorExtensions}}
     {{#rxInterface}}
-{{>RxMethod}}
+{{>rxMethod}}
     {{/rxInterface}}
     {{^rxInterface}}
-{{>AsyncMethod}}
+{{>asyncMethod}}
     {{/rxInterface}}
-    
+
 {{/operation}}
 {{/operations}}
 }

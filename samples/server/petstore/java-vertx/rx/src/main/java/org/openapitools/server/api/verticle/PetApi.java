@@ -8,32 +8,34 @@ import org.openapitools.server.api.model.Pet;
 import rx.Completable;
 import rx.Single;
 
+import org.openapitools.server.api.Api;
+
 import java.util.List;
 import java.util.Map;
 
-public interface PetApi  {
+public interface PetApi extends Api {
     //addPet
-    public Completable addPet(Pet pet);
-    
+    public Completable addPet(Pet body);
+
     //deletePet
     public Completable deletePet(Long petId,String apiKey);
-    
+
     //findPetsByStatus
     public Single<List<Pet>> findPetsByStatus(List<String> status);
-    
+
     //findPetsByTags
     public Single<List<Pet>> findPetsByTags(List<String> tags);
-    
+
     //getPetById
     public Single<Pet> getPetById(Long petId);
-    
+
     //updatePet
-    public Completable updatePet(Pet pet);
-    
+    public Completable updatePet(Pet body);
+
     //updatePetWithForm
     public Completable updatePetWithForm(Long petId,String name,String status);
-    
+
     //uploadFile
     public Single<ModelApiResponse> uploadFile(Long petId,String additionalMetadata,File file);
-    
+
 }

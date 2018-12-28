@@ -2,12 +2,14 @@ package org.openapitools.server.api.verticle;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.Future;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
+import org.openapitools.server.api.ApiRegistry;
 import org.openapitools.server.api.MainApiException;
 import org.openapitools.server.api.model.Order;
 
@@ -15,8 +17,8 @@ import java.util.List;
 import java.util.Map;
 
 public class StoreApiVerticle extends AbstractVerticle {
-    final static Logger LOGGER = LoggerFactory.getLogger(StoreApiVerticle.class); 
-    
+    final static Logger LOGGER = LoggerFactory.getLogger(StoreApiVerticle.class);
+
     final static String DELETEORDER_SERVICE_ID = "deleteOrder";
     final static String GETINVENTORY_SERVICE_ID = "getInventory";
     final static String GETORDERBYID_SERVICE_ID = "getOrderById";
@@ -25,17 +27,11 @@ public class StoreApiVerticle extends AbstractVerticle {
     final StoreApi service;
 
     public StoreApiVerticle() {
-        try {
-            Class serviceImplClass = getClass().getClassLoader().loadClass("org.openapitools.server.api.verticle.StoreApiImpl");
-            service = (StoreApi)serviceImplClass.newInstance();
-        } catch (Exception e) {
-            logUnexpectedError("StoreApiVerticle constructor", e);
-            throw new RuntimeException(e);
-        }
+        service = (org.openapitools.server.api.verticle.StoreApi) ApiRegistry.getInstance().get("org.openapitools.server.api.verticle.StoreApiImpl");
     }
 
     @Override
-    public void start() throws Exception {
+    public void start(Future<Void> startFuture) throws Exception {
         
         //Consumer for deleteOrder
         vertx.eventBus().<JsonObject> consumer(DELETEORDER_SERVICE_ID).handler(message -> {
@@ -43,10 +39,6 @@ public class StoreApiVerticle extends AbstractVerticle {
                 // Workaround for #allParams section clearing the vendorExtensions map
                 String serviceId = "deleteOrder";
                 String orderIdParam = message.body().getString("orderId");
-                if(orderIdParam == null) {
-                    manageError(message, new MainApiException(400, "orderId is required"), serviceId);
-                    return;
-                }
                 String orderId = orderIdParam;
                 service.deleteOrder(orderId, result -> {
                     if (result.succeeded())
@@ -87,10 +79,6 @@ public class StoreApiVerticle extends AbstractVerticle {
                 // Workaround for #allParams section clearing the vendorExtensions map
                 String serviceId = "getOrderById";
                 String orderIdParam = message.body().getString("orderId");
-                if(orderIdParam == null) {
-                    manageError(message, new MainApiException(400, "orderId is required"), serviceId);
-                    return;
-                }
                 Long orderId = Json.mapper.readValue(orderIdParam, Long.class);
                 service.getOrderById(orderId, result -> {
                     if (result.succeeded())
@@ -111,13 +99,13 @@ public class StoreApiVerticle extends AbstractVerticle {
             try {
                 // Workaround for #allParams section clearing the vendorExtensions map
                 String serviceId = "placeOrder";
-                JsonObject orderParam = message.body().getJsonObject("Order");
-                if (orderParam == null) {
-                    manageError(message, new MainApiException(400, "Order is required"), serviceId);
+                JsonObject bodyParam = message.body().getJsonObject("body");
+                if (bodyParam == null) {
+                    manageError(message, new MainApiException(400, "body is required"), serviceId);
                     return;
                 }
-                Order order = Json.mapper.readValue(orderParam.encode(), Order.class);
-                service.placeOrder(order, result -> {
+                Order body = Json.mapper.readValue(bodyParam.encode(), Order.class);
+                service.placeOrder(body, result -> {
                     if (result.succeeded())
                         message.reply(new JsonObject(Json.encode(result.result())).encodePrettily());
                     else {
@@ -132,7 +120,7 @@ public class StoreApiVerticle extends AbstractVerticle {
         });
         
     }
-    
+
     private void manageError(Message<JsonObject> message, Throwable cause, String serviceName) {
         int code = MainApiException.INTERNAL_SERVER_ERROR.getStatusCode();
         String statusMessage = MainApiException.INTERNAL_SERVER_ERROR.getStatusMessage();
@@ -140,12 +128,12 @@ public class StoreApiVerticle extends AbstractVerticle {
             code = ((MainApiException)cause).getStatusCode();
             statusMessage = ((MainApiException)cause).getStatusMessage();
         } else {
-            logUnexpectedError(serviceName, cause); 
+            logUnexpectedError(serviceName, cause);
         }
-            
+
         message.fail(code, statusMessage);
     }
-    
+
     private void logUnexpectedError(String serviceName, Throwable cause) {
         LOGGER.error("Unexpected error in "+ serviceName, cause);
     }

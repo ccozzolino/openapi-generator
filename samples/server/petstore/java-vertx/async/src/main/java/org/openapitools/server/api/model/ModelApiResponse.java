@@ -7,16 +7,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Describes the result of uploading an image resource
  **/
-@JsonInclude(JsonInclude.Include.NON_NULL) 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ModelApiResponse   {
   
   private Integer code;
   private String type;
   private String message;
 
-  public ModelApiResponse () {
-
-  }
+  public ModelApiResponse () { }
 
   public ModelApiResponse (Integer code, String type, String message) {
     this.code = code;

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * A User who is purchasing from the pet store
  **/
-@JsonInclude(JsonInclude.Include.NON_NULL) 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class User   {
   
   private Long id;
@@ -19,9 +19,7 @@ public class User   {
   private String phone;
   private Integer userStatus;
 
-  public User () {
-
-  }
+  public User () { }
 
   public User (Long id, String username, String firstName, String lastName, String email, String password, String phone, Integer userStatus) {
     this.id = id;

@@ -9,13 +9,13 @@ import java.time.OffsetDateTime;
 /**
  * An order for a pets from the pet store
  **/
-@JsonInclude(JsonInclude.Include.NON_NULL) 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Order   {
   
-  private Long id = null;
-  private Long petId = null;
-  private Integer quantity = null;
-  private OffsetDateTime shipDate = null;
+  private Long id;
+  private Long petId;
+  private Integer quantity;
+  private OffsetDateTime shipDate;
 
 
   public enum StatusEnum {
@@ -36,12 +36,10 @@ public class Order   {
     }
   }
 
-  private StatusEnum status = null;
+  private StatusEnum status;
   private Boolean complete = false;
 
-  public Order () {
-
-  }
+  public Order () { }
 
   public Order (Long id, Long petId, Integer quantity, OffsetDateTime shipDate, StatusEnum status, Boolean complete) {
     this.id = id;

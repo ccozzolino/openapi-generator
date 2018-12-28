@@ -1,0 +1,127 @@
+package {{package}};
+
+import java.util.Map;
+import java.util.HashMap;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.api.RequestParameter;
+import io.vertx.ext.web.api.RequestParameters;
+
+import {{rootPackage}}.ApiMessageBuilderBase;
+import {{rootPackage}}.ContentExtractor;
+
+public class {{classname}}MessageBuilderImpl extends ApiMessageBuilderBase {
+    {{#operations}}
+      {{#operation}}
+        {{#hasParams}}
+    private static class ContentExtractor_{{operationId}} implements ContentExtractor {
+          {{#hasBodyParam}}
+        private JsonObject body(RequestParameters requestParameters) {
+            JsonObject jsonObject = new JsonObject();
+            {{#bodyParam}}
+              {{#isListContainer}}
+            jsonObject = jsonObject.put("{{paramName}}", requestParameters.body().getJsonArray());
+              {{/isListContainer}}
+              {{^isListContainer}}
+            jsonObject = jsonObject.put("{{paramName}}", requestParameters.body().getJsonObject());
+              {{/isListContainer}}
+            {{/bodyParam}}
+            return jsonObject;
+        }
+          {{/hasBodyParam}}
+          {{#hasQueryParams}}
+        private JsonObject queryParameters(RequestParameters requestParameters) {
+            JsonObject jsonObject = new JsonObject();
+          {{#queryParams}}
+{{>apiMessageBuilderParameters}}
+          {{/queryParams}}
+            return jsonObject;
+        }
+          {{/hasQueryParams}}
+          {{#hasCookieParams}}
+        private JsonObject cookieParameters(RequestParameters requestParameters) {
+            JsonObject jsonObject = new JsonObject();
+          {{#cookieParams}}
+{{>apiMessageBuilderParameters}}
+          {{/cookieParams}}
+            return jsonObject;
+        }
+          {{/hasCookieParams}}
+          {{#hasHeaderParams}}
+        private JsonObject headerParameters(RequestParameters requestParameters) {
+            JsonObject jsonObject = new JsonObject();
+          {{#headerParams}}
+{{>apiMessageBuilderParameters}}
+          {{/headerParams}}
+            return jsonObject;
+        }
+          {{/hasHeaderParams}}
+          {{#hasPathParams}}
+        private JsonObject pathParameters(RequestParameters requestParameters) {
+            JsonObject jsonObject = new JsonObject();
+          {{#pathParams}}
+{{>apiMessageBuilderParameters}}
+          {{/pathParams}}
+            return jsonObject;
+        }
+          {{/hasPathParams}}
+          {{#hasFormParams}}
+        private JsonObject formParameters(RequestParameters requestParameters) {
+            JsonObject jsonObject = new JsonObject();
+          {{#formParams}}
+{{>apiMessageBuilderParameters}}
+          {{/formParams}}
+            return jsonObject;
+        }
+          {{/hasFormParams}}
+
+        public JsonObject extract(RequestParameters requestParameters) {
+          JsonObject jsonObject = new JsonObject();
+
+          {{#hasQueryParams}}
+          jsonObject = jsonObject.mergeIn(queryParameters(requestParameters), true);
+          {{/hasQueryParams}}
+          {{#hasCookieParams}}
+          jsonObject = jsonObject.mergeIn(cookieParameters(requestParameters), true);
+          {{/hasCookieParams}}
+          {{#hasPathParams}}
+          jsonObject = jsonObject.mergeIn(pathParameters(requestParameters), true);
+          {{/hasPathParams}}
+          {{#hasHeaderParams}}
+          jsonObject = jsonObject.mergeIn(headerParameters(requestParameters), true);
+          {{/hasHeaderParams}}
+          {{#hasFormParams}}
+          jsonObject = jsonObject.mergeIn(formParameters(requestParameters), true);
+          {{/hasFormParams}}
+          {{#hasBodyParam}}
+          jsonObject = jsonObject.mergeIn(body(requestParameters), true);
+          {{/hasBodyParam}}
+
+          return jsonObject;
+        }
+    }
+        {{/hasParams}}
+      {{/operation}}
+    {{/operations}}
+
+    private final ContentExtractor contentExtractor;
+    private final static Map<String, ContentExtractor> contentExtractors;
+
+    static {
+        contentExtractors = new HashMap<>();
+        {{#operations}}
+          {{#operation}}
+            {{#hasParams}}
+        contentExtractors.put("{{operationId}}", new ContentExtractor_{{operationId}}());
+            {{/hasParams}}
+          {{/operation}}
+        {{/operations}}
+    }
+
+    public {{classname}}MessageBuilderImpl(String operationId) {
+        this.contentExtractor = contentExtractors.get(operationId);
+    }
+
+    protected ContentExtractor getContentExtractor() {
+        return contentExtractor;
+    }
+}
