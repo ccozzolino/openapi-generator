@@ -184,6 +184,8 @@ public class JavaVertXServerCodegen extends AbstractJavaCodegen {
                 resourceFolder, "vertx-default-jul-logging.properties"));
         writeOptional(outputFolder, new SupportingFile("pom.mustache", "", "pom.xml"));
         writeOptional(outputFolder, new SupportingFile("README.mustache", "", "README.md"));
+        writeOptional(outputFolder, new SupportingFile("LICENSE.mustache", "", "LICENSE"));
+        writeOptional(outputFolder, new SupportingFile("NOTICE.mustache", "", "NOTICE"));
     }
 
     @Override

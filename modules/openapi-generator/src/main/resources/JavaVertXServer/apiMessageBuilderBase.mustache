@@ -12,9 +12,11 @@ import io.vertx.ext.web.api.RequestParameters;
 import io.vertx.ext.web.RoutingContext;
 
 public abstract class ApiMessageBuilderBase implements ApiMessageBuilder {
+    // Fields copied from Florent Chamfroy's (phiz71) vertx-swagger project (SwaggerRouter.java)
     public static final String AUTH_USER_HEADER_KEY = "AUTH_USER";
     public static final String AUTH_PROVIDER_NAME_HEADER_KEY = "AUTH_PROVIDER_NAME";
 
+    // Method copied from Florent Chamfroy's (phiz71) vertx-swagger project (SwaggerRouter.java)
     protected void addAuthUserHeader(RoutingContext context, DeliveryOptions deliveryOptions) {
         Buffer buffer = Buffer.buffer();
         new UserHolder(context).writeToBuffer(buffer);
@@ -25,6 +27,7 @@ public abstract class ApiMessageBuilderBase implements ApiMessageBuilder {
         }
     }
 
+    // Method copied from Florent Chamfroy's (phiz71) vertx-swagger project (SwaggerRouter.java)
     protected User extractAuthUserFromMessage(Message<?> message) {
         User user = null;
         String serializedUser = message.headers().get(AUTH_USER_HEADER_KEY);

@@ -10,6 +10,7 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.impl.AuthHandlerImpl;
 import io.vertx.ext.web.handler.impl.HttpStatusException;
 
+// Class copied and slightly modified from Florent Chamfroy's (phiz71) vertx-swagger project (ApiAuthKeyHandler.java)
 public class ApiKeyAuthHandler extends AuthHandlerImpl {
     private static final HttpStatusException UNAUTHORIZED = new HttpStatusException(401);
 
